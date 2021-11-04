@@ -1,0 +1,51 @@
+.layout {
+    .ant-layout-header {
+        display: grid;
+        align-items: center;
+        grid-template-columns: 120px calc(100% - 160px);
+        justify-content: space-between;
+    }
+    .logo {
+        max-height: 64px;
+        width: 120px;
+    }
+    .ant-menu-root {
+        justify-content: flex-end;
+        width: 100%;
+    }
+    .site-layout-content {
+        min-height: 480px;
+        padding: 24px;
+        background: #fff;
+        background-image: url('/img/travel-banner.jpg');
+        background-repeat: no-repeat;
+        background-position: 83%;
+        background-size: cover;
+        .titleContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -30%);
+            text-align: center;
+            >h1 {
+                font-size: 24px;
+                color: #fff;
+            }
+            .searchItem {
+                margin-bottom: 20px;
+            }
+        }
+    }
+    #components-layout-demo-top .logo {
+        float: left;
+        width: 120px;
+        height: 31px;
+        margin: 16px 24px 16px 0;
+        background: rgba(255, 255, 255, 0.3);
+    }
+    .ant-row-rtl #components-layout-demo-top .logo {
+        float: right;
+        margin: 16px 0 16px 24px;
+    }
+    @media (min-width: 768px) {}
+}
