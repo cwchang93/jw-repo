@@ -5,6 +5,9 @@
         grid-template-columns: 120px calc(100% - 160px);
         justify-content: space-between;
     }
+    .ant-layout-content {
+        padding: 0 20px;
+    }
     .logo {
         max-height: 64px;
         width: 120px;
@@ -27,13 +30,47 @@
             left: 50%;
             transform: translate(-50%, -30%);
             text-align: center;
+            width: calc(100% - 100px);
+            max-width: 340px;
             >h1 {
-                font-size: 24px;
+                font-size: 32px;
                 color: #fff;
             }
             .searchItem {
                 margin-bottom: 20px;
+                font-size: 24px;
+                >a {
+                    color: #fff;
+                }
             }
+        }
+    }
+    .tourSectWrap {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-gap: 30px;
+        margin-top: 36px;
+        .ant-card {
+            .ant-card-body {
+                .ant-card-meta {
+                    .ant-card-meta-detail {
+                        .ant-card-meta-description {
+                            display: -webkit-box;
+                            -webkit-line-clamp: 3;
+                            -webkit-box-orient: vertical;
+                        }
+                    }
+                }
+            }
+        }
+        .MuiTypography-root {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            // display: -webkit-box;
+            // -webkit-line-clamp: 3;
+            // -webkit-box-orient: vertical;
         }
     }
     #components-layout-demo-top .logo {
@@ -47,5 +84,24 @@
         float: right;
         margin: 16px 0 16px 24px;
     }
-    @media (min-width: 768px) {}
+    @media (min-width: 768px) {
+        .ant-layout-content {
+            padding: 0 60px;
+        }
+        .site-layout-content {
+            .titleContainer {
+                transform: translate(-50%, -65%);
+                >h1 {
+                    font-size: 40px;
+                }
+                .searchItem {}
+            }
+        }
+        .tourSectWrap {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            margin-top: 36px;
+        }
+    }
 }

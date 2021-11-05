@@ -2,11 +2,20 @@ import Head from 'next/head'
 import axios from 'axios';
 import * as React from 'react';
 
-import { Layout, Menu, Breadcrumb, Dropdown, Input } from 'antd';
+import { Layout, Menu, Breadcrumb, Dropdown, Input, Col, Row } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
-import TwCitySelector from 'tw-city-selector';
 import CityData from '../../json/city.json';
 import { getAuthorizationHeader } from '../../utils/key'
+
+import { faLocationArrow, faMapMarkerAlt, faPhoneVolume } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 
 export default function Index() {
 
@@ -15,18 +24,20 @@ export default function Index() {
 
     const navArr = ['觀光景點', '美食住宿', '交通動態']
 
-    const [searchCity, setSeachCity] = React.useState<string>('選擇縣市')
+    const [searchCity, setSeachCity] = React.useState<string>('Taipei City')
 
-    const contentStyle = {
-        height: '160px',
-        color: '#fff',
-        lineHeight: '160px',
-        textAlign: 'center',
-        background: '#364d79',
-    };
+    // const { Meta } = Card;
 
-    const onSearch = (value: String) => {
-        searchTouristPlace(searchCity);
+    // const { Text, Link } = Typography;
+
+
+    React.useEffect(() => {
+        searchTouristPlace('Taipei', '');
+
+    }, [])
+
+    const onSearch = (value: string) => {
+        searchTouristPlace(searchCity, value);
 
         console.log('val', value);
     }
@@ -35,16 +46,12 @@ export default function Index() {
         return originCity.includes('City') ? originCity.split(' ')[0] : originCity.replace(/\s/g, '');
     }
 
-    const arr = [];
 
 
 
 
     const menu = () => {
         const { data } = CityData;
-        const cityArr = data.map((ele) => {
-            return filterApiKey(ele.CityEngName);
-        })
 
         const itemDom = data.map((cityObj) => {
             return (
@@ -61,13 +68,18 @@ export default function Index() {
         )
     }
 
-    const searchTouristPlace = (city) => {
-        axios.get(`https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$top=4&$format=JSON`, {
+    const searchTouristPlace = (city: string, keywordTxt: string, dataNums: number = 40) => {
+
+        const fectchedApi = keywordTxt ? `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$filter=contains(Name,'${keywordTxt}')&$top=${dataNums}&$format=JSON` : `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$top=${dataNums}&$format=JSON`
+
+        axios.get(fectchedApi, {
             headers: getAuthorizationHeader()
         }).then((res) => {
+            console.log(res.data);
             setTourData(res.data);
         })
     }
+
 
 
     return (
@@ -85,7 +97,7 @@ export default function Index() {
 
 
             </Header>
-            <Content style={{ padding: '0 50px' }}>
+            <Content >
                 <Breadcrumb style={{ margin: '16px 0' }}>
                     <Breadcrumb.Item>Home</Breadcrumb.Item>
                     <Breadcrumb.Item>List</Breadcrumb.Item>
@@ -110,9 +122,56 @@ export default function Index() {
 
                 </div>
 
-                <section>
+                <FontAwesomeIcon icon={faLocationArrow} /> 景點
+                <section className="tourSectWrap">
                     {
-                        JSON.stringify(tourData)
+                        tourData.map((ele, idx) => {
+                            return (
+                                <Card key={ele.ID} sx={{ maxWidth: 345 }}>
+                                    <CardMedia
+                                        component="img"
+                                        height="140"
+                                        image={ele.Picture['PictureUrl1']}
+                                        alt="green iguana"
+                                    />
+                                    <CardContent>
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            {ele.Name}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {ele.DescriptionDetail}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions>
+                                        <Button size="small" target="blank" href={ele.WebsiteUrl}>了解詳情</Button>
+                                    </CardActions>
+                                </Card>
+                                // <Col span={6}>
+                                //     <Card
+                                //         key={idx}
+                                //         hoverable
+                                //         style={{ width: 240 }}
+                                //         cover={<img alt="example" src={ele.Picture['PictureUrl1']} />}
+                                //     >
+                                //         <Meta title={ele.Name} />
+
+                                //         {
+                                //             ele.Address &&
+                                //             <Card.Grid className="address" >
+                                //                 <FontAwesomeIcon icon={faMapMarkerAlt} />
+                                //                 {ele.Address}
+                                //             </Card.Grid>
+                                //         }                                    
+
+                                //         <div className="contactInfo">
+                                //             <FontAwesomeIcon icon={faPhoneVolume} />
+                                //             {ele.Phone}
+                                //         </div>
+                                //         <Meta description={ele.DescriptionDetail} />
+                                //     </Card>
+                                // </Col>
+                            )
+                        })
                     }
                 </section>
 

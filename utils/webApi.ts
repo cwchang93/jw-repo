@@ -17,3 +17,5 @@ const getUrlParams = (searchString: string): qString => {
 
     return obj;
 }
+
+export { }
