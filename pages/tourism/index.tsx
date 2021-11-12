@@ -13,7 +13,7 @@ import { useScrollPosition } from 'react-use-scroll-position';
 import {
     Card, CardActions, CardContent, CardMedia, Button, Container, Tabs, Tab, Box,
     Typography, Menu, MenuItem, IconButton, TextField, Input, InputLabel, FormControl, Select, List, ListItem, ListItemIcon, ListItemText,
-    Drawer
+    Drawer, Fade, Modal, Backdrop
 } from '@mui/material'
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -46,12 +46,29 @@ export default function Index() {
         right: false,
     });
 
-    const open = Boolean(anchorEl);
+    const [popData, setPopData] = React.useState(null);
+
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+    };
+
+    // const open = Boolean(anchorEl);
 
     const anchor = 'right';
 
-
     const { y: yPosition } = useScrollPosition();
+
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     // first time
     React.useEffect(() => {
@@ -102,6 +119,12 @@ export default function Index() {
     const handleCityChange = (event) => {
         setSeachCity(event.target.value);
     };
+
+    const openLightBox = (clickedData) => {
+        console.log('clickedData', clickedData)
+        setPopData(clickedData);
+        setOpen(true);
+    }
 
 
     const slideUp = () => {
@@ -174,7 +197,6 @@ export default function Index() {
                     aria-label="more"
                     id="long-button"
                     aria-controls="long-menu"
-                    aria-expanded={open ? 'true' : undefined}
                     aria-haspopup="true"
                     onClick={toggleDrawer(anchor, true)}
                 >
@@ -256,7 +278,6 @@ export default function Index() {
                 <Typography variant="h6" className="searchResult">
                     <FontAwesomeIcon icon={faSearch} /> 搜尋結果
                 </Typography>
-
                 <section className="tourSectWrap">
                     {
                         tourData.map((ele, idx) => {
@@ -264,7 +285,7 @@ export default function Index() {
                                 <Card key={ele.ID} sx={{ maxWidth: 345 }}>
                                     <CardMedia
                                         component="img"
-                                        height="140"
+                                        height="240"
                                         image={ele.Picture['PictureUrl1'] || '/img/defaultPlace.png'}
                                         alt="green iguana"
                                     />
@@ -277,13 +298,52 @@ export default function Index() {
                                         </Typography>
                                     </CardContent>
                                     <CardActions className="knowMoreWrap">
-                                        <Button size="small" target="blank" href={ele.WebsiteUrl}>了解更多<ArrowRightIcon /></Button>
+                                        <Button size="small" onClick={() => openLightBox(ele)}>了解更多<ArrowRightIcon /></Button>
                                     </CardActions>
                                 </Card>
                             )
                         })
                     }
                 </section>
+                {popData &&
+
+                    <Modal
+                        aria-labelledby="transition-modal-title"
+                        aria-describedby="transition-modal-description"
+                        open={open}
+                        onClose={handleClose}
+                        closeAfterTransition
+                        BackdropComponent={Backdrop}
+                        BackdropProps={{
+                            timeout: 500,
+                        }}
+                    >
+                        <Fade in={open}>
+                            <Box sx={style}>
+                                <Card key={popData.ID} sx={{ maxWidth: 345 }}>
+                                    <CardMedia
+                                        component="img"
+                                        height="240"
+                                        image={popData.Picture['PictureUrl1'] || '/img/defaultPlace.png'}
+                                        alt="green iguana"
+                                    />
+                                    <CardContent>
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            {popData.Name}
+                                        </Typography>
+                                        <Typography className="siteDesp" variant="body2" color="text.secondary">
+                                            {popData.DescriptionDetail}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions className="knowMoreWrap">
+                                        <Button size="small" href={popData.WebsiteUrl} target="blank">官方連結<ArrowRightIcon /></Button>
+                                    </CardActions>
+                                </Card>
+                            </Box>
+                        </Fade>
+                    </Modal>
+
+                }
             </Container>
 
 
