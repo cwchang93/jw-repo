@@ -1,107 +1,239 @@
-.layout {
-    .ant-layout-header {
-        display: grid;
-        align-items: center;
-        grid-template-columns: 120px calc(100% - 160px);
+@mixin shortInput {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+@mixin thinInput {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+@mixin blinkAnimation {
+    @-webkit-keyframes blinker {
+        from {
+            opacity: 1.0;
+        }
+        to {
+            opacity: 0.0;
+        }
+    }
+    text-decoration: blink;
+    -webkit-animation-name: blinker;
+    -webkit-animation-duration: 0.6s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-direction: alternate;
+}
+
+.pg_tourism {
+    .MuiBox-root {
+        z-index: 2;
+        display: none;
         justify-content: space-between;
-    }
-    .ant-layout-content {
-        padding: 0 20px;
-    }
-    .logo {
-        max-height: 64px;
-        width: 120px;
-    }
-    .ant-menu-root {
-        justify-content: flex-end;
+        position: fixed;
         width: 100%;
+        background: #444;
+        height: 60px;
+        padding: 0 10px;
+        &.showNav {
+            display: flex;
+        }
+        .MuiTabs-root {
+            display: none;
+            color: #fff;
+        }
+        .MuiButtonBase-root {
+            color: #fff;
+        }
+        .moreIcon {
+            >svg {
+                font-size: 36px;
+            }
+        }
+        .logoWrap {
+            font-size: 24px;
+            display: flex;
+            >img {
+                width: 30px;
+            }
+            .travelTxt {
+                font-size: 16px;
+                min-width: 80px;
+                position: relative;
+                color: #fff;
+                >div {
+                    position: absolute;
+                }
+                div:first-child {
+                    top: 8px;
+                }
+                div:nth-child(2) {
+                    bottom: 8px;
+                    right: 3px;
+                }
+            }
+        }
     }
-    .site-layout-content {
-        min-height: 480px;
-        padding: 24px;
-        background: #fff;
+    .mainContent {
         background-image: url('/img/travel-banner.jpg');
         background-repeat: no-repeat;
         background-position: 83%;
         background-size: cover;
+        height: 480px;
+        padding: 24px;
+        position: relative;
+        height: 100vh;
         .titleContainer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -30%);
             text-align: center;
-            width: calc(100% - 100px);
-            max-width: 340px;
+            text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            font-style: normal;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: calc(50vh - 150px);
             >h1 {
-                font-size: 32px;
-                color: #fff;
-            }
-            .searchItem {
-                margin-bottom: 20px;
-                font-size: 24px;
-                >a {
-                    color: #fff;
-                }
+                color: #fff
             }
         }
+        .triangleIcon {
+            @include blinkAnimation;
+            position: absolute;
+            cursor: pointer;
+            color: #fff;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 20px;
+        }
     }
-    .tourSectWrap {
-        display: grid;
-        grid-template-columns: 1fr;
-        grid-gap: 30px;
-        margin-top: 36px;
-        .ant-card {
-            .ant-card-body {
-                .ant-card-meta {
-                    .ant-card-meta-detail {
-                        .ant-card-meta-description {
-                            display: -webkit-box;
-                            -webkit-line-clamp: 3;
-                            -webkit-box-orient: vertical;
-                        }
+    .MuiContainer-root {
+        padding: 16px;
+        >section {
+            padding-bottom: 20px;
+        }
+        .searchResult {
+            padding: 20px 0;
+        }
+        .tourSectWrap {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-gap: 32px;
+            .MuiPaper-root {
+                width: 100%;
+                max-width: unset;
+                .siteDesp {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .knowMoreWrap {
+                    justify-content: flex-end;
+                    .MuiSvgIcon-root {
+                        margin-left: -5px;
                     }
                 }
             }
         }
-        .MuiTypography-root {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            // display: -webkit-box;
-            // -webkit-line-clamp: 3;
-            // -webkit-box-orient: vertical;
+    }
+    .searchItem {
+        margin-top: 16px;
+        .MuiFormControl-root {
+            align-items: center;
         }
-    }
-    #components-layout-demo-top .logo {
-        float: left;
-        width: 120px;
-        height: 31px;
-        margin: 16px 24px 16px 0;
-        background: rgba(255, 255, 255, 0.3);
-    }
-    .ant-row-rtl #components-layout-demo-top .logo {
-        float: right;
-        margin: 16px 0 16px 24px;
-    }
-    @media (min-width: 768px) {
-        .ant-layout-content {
-            padding: 0 60px;
+        .MuiSelect-select {
+            // color: #fff;
+            background: #fff;
+            @include shortInput;
         }
-        .site-layout-content {
-            .titleContainer {
-                transform: translate(-50%, -65%);
-                >h1 {
-                    font-size: 40px;
-                }
-                .searchItem {}
+        .MuiFormControl-root {
+            // margin-top: 20px;
+        }
+        .MuiOutlinedInput-root {
+            background: #fff;
+            max-width: 250px;
+            width: 100%;
+            .MuiOutlinedInput-input {
+                @include shortInput;
             }
         }
-        .tourSectWrap {
+        &:last-child {
+            margin-top: 14px;
+            .MuiButton-root {
+                border-color: #666;
+                color: #666;
+                background-color: #fff;
+                padding: 6px 18px;
+                width: 80px;
+            }
+        }
+    }
+    .MuiTextField-root {
+        max-width: 250px;
+        width: 100%;
+        #filled-textarea {
+            color: #fff;
+        }
+    }
+    @media (min-width: 768px) {
+        .MuiBox-root {
+            justify-content: space-between;
+            position: fixed;
+            width: 100%;
+            padding: 0 calc(50% - 600px);
+            .moreIcon {
+                display: none;
+            }
+            .MuiTabs-root {
+                display: block;
+            }
+        }
+        .MuiContainer-root {
+            width: 100vw;
+            padding: 0;
+            .tourSectWrap {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 1200px;
+                margin: 0;
+                .MuiPaper-root {
+                    // width: 100%;
+                    // max-width: unset;
+                }
+            }
+        }
+        .mainContent {
+            height: 480px; // margin-top: 30%;
+            .titleContainer {
+                margin-top: 120px;
+            }
+            .triangleIcon {
+                display: none;
+            }
+        }
+        .searchItemWrap {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 10px;
-            margin-top: 36px;
+            grid-auto-flow: column;
+            justify-content: center;
+            grid-gap: 15px;
+            align-items: center;
+            .searchItem {
+                .MuiSelect-select {
+                    @include thinInput;
+                }
+                .MuiOutlinedInput-root {
+                    .MuiOutlinedInput-input {
+                        @include thinInput;
+                    }
+                }
+                .searchInput {
+                    .MuiFormLabel-root {
+                        top: -6px;
+                    }
+                }
+                &:last-child {
+                    .MuiButton-root {}
+                }
+            }
         }
     }
 }

@@ -2,74 +2,133 @@ import Head from 'next/head'
 import axios from 'axios';
 import * as React from 'react';
 
-import { Layout, Menu, Breadcrumb, Dropdown, Input, Col, Row } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
 import CityData from '../../json/city.json';
 import { getAuthorizationHeader } from '../../utils/key'
+import cx from 'classnames';
 
-import { faLocationArrow, faMapMarkerAlt, faPhoneVolume } from '@fortawesome/free-solid-svg-icons'
+import { faLocationArrow, faThermometerQuarter, faSearch } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useScrollPosition } from 'react-use-scroll-position';
 
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
+import {
+    Card, CardActions, CardContent, CardMedia, Button, Container, Tabs, Tab, Box,
+    Typography, Menu, MenuItem, IconButton, TextField, Input, InputLabel, FormControl, Select, List, ListItem, ListItemIcon, ListItemText,
+    Drawer
+} from '@mui/material'
+
+import MenuIcon from '@mui/icons-material/Menu';
+import EjectIcon from '@mui/icons-material/Eject';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+
 
 export default function Index() {
 
+    const { data } = CityData;
+    const navArr = [
+        '主頁',
+        '餐飲',
+        '旅宿',
+        '觀光'
+    ];
+
     const [tourData, setTourData] = React.useState([]);
-    const { Header, Content, Footer } = Layout;
+    const [searchCity, setSeachCity] = React.useState<string>('Taipei City');
+    const [tab, setTab] = React.useState(navArr[0]);
+    const [keyWord, setKeyword] = React.useState<string>('');
+    const [anchorEl, setAnchorEl] = React.useState(null);
 
-    const navArr = ['觀光景點', '美食住宿', '交通動態']
+    const [showNav, setShowNav] = React.useState<boolean>(false);
 
-    const [searchCity, setSeachCity] = React.useState<string>('Taipei City')
+    const [state, setState] = React.useState({
+        top: false,
+        left: false,
+        bottom: false,
+        right: false,
+    });
 
-    // const { Meta } = Card;
+    const open = Boolean(anchorEl);
 
-    // const { Text, Link } = Typography;
+    const anchor = 'right';
 
 
+    const { y: yPosition } = useScrollPosition();
+
+    // first time
     React.useEffect(() => {
         searchTouristPlace('Taipei', '');
-
     }, [])
 
-    const onSearch = (value: string) => {
-        searchTouristPlace(searchCity, value);
+    React.useEffect(() => {
+        searchTouristPlace(searchCity, keyWord);
+    }, [searchCity])
 
-        console.log('val', value);
+    React.useEffect(() => {
+        yPosition !== 0 ? setShowNav(true) : setShowNav(false);
+    }, [yPosition])
+
+
+    const toggleDrawer = (anchor, open) => (event) => {
+        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
+        }
+        setState({ ...state, [anchor]: open });
+        console.log('state', state);
+    };
+
+    const list = (anchor) => {
+        return (
+            <Box
+                sx={{ width: 250 }}
+                role="presentation"
+                onClick={toggleDrawer(anchor, false)}
+                onKeyDown={toggleDrawer(anchor, false)}
+            >
+                <List>
+                    {navArr.map((text, index) => (
+                        <ListItem button key={text} onClick={() => console.log('text', text)}>
+                            <ListItemText primary={text} />
+                        </ListItem>
+                    ))}
+                </List>
+            </Box>)
+    };
+
+
+    const handleTabChange = (event, newValue) => {
+        console.log('newValue', newValue);
+        setTab(newValue)
     }
+
+    const handleCityChange = (event) => {
+        setSeachCity(event.target.value);
+    };
+
+
+    const slideUp = () => {
+        console.log('up!');
+    }
+
+    const sortEngZhCities = (arrObjData) => {
+        const o = {};
+        arrObjData.forEach((cityEle) => {
+            o[cityEle.CityEngName] = cityEle.CityName;
+        })
+        return o;
+    }
+
+    const engZhCTObj = sortEngZhCities(data);
+
+    const handleKeyword = (e) => {
+        setKeyword(e.target.value);
+    }
+
 
     const filterApiKey = (originCity: String) => {
         return originCity.includes('City') ? originCity.split(' ')[0] : originCity.replace(/\s/g, '');
     }
 
 
-
-
-
-    const menu = () => {
-        const { data } = CityData;
-
-        const itemDom = data.map((cityObj) => {
-            return (
-                <Menu.Item key={cityObj.CityEngName} onClick={selectedCity => setSeachCity(selectedCity['key'])}>
-                    {cityObj.CityName}
-                </Menu.Item>
-            )
-        })
-
-        return (
-            <Menu>
-                {itemDom}
-            </Menu>
-        )
-    }
-
     const searchTouristPlace = (city: string, keywordTxt: string, dataNums: number = 40) => {
-
         const fectchedApi = keywordTxt ? `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$filter=contains(Name,'${keywordTxt}')&$top=${dataNums}&$format=JSON` : `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$top=${dataNums}&$format=JSON`
 
         axios.get(fectchedApi, {
@@ -83,46 +142,121 @@ export default function Index() {
 
 
     return (
-        <Layout className="layout">
-            <Header>
-                {/* <div className="logo" /> */}
-                <img className="logo" src="https://chun-wei.com/img/jinwei_logo4.png" alt="JW's profile" />
-                <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
-                    {navArr.map((ele, index) => {
-                        const key = index + 1;
-                        return <Menu.Item key={key}>{ele}</Menu.Item>;
-                    })}
-
-                </Menu>
-
-
-            </Header>
-            <Content >
-                <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item>Home</Breadcrumb.Item>
-                    <Breadcrumb.Item>List</Breadcrumb.Item>
-                    <Breadcrumb.Item>App</Breadcrumb.Item>
-                </Breadcrumb>
-                <div className="site-layout-content">
-                    <div className="titleContainer">
-                        <h1>台灣旅遊景點導覽</h1>
-                        <div className="searchItem">
-                            <Dropdown overlay={menu}>
-                                <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-                                    {searchCity} <DownOutlined />
-                                </a>
-                            </Dropdown>
+        <div className='pg_tourism'>
+            <Box className={cx({ showNav: showNav })}>
+                <div className="logoWrap">
+                    <img src="/svg/taiwan-icon-white.svg" alt="taiwan-icon" />
+                    <div className="travelTxt">
+                        <div>
+                            Taiwan
                         </div>
-                        <div className="searchItem">
-                            <Input.Search placeholder="搜尋關鍵字" onSearch={onSearch} enterButton />
+                        <div>
+                            Travel
                         </div>
-                        <div className="searchItem"></div>
                     </div>
+                </div>
+                <Tabs
+                    onChange={handleTabChange}
+                    value={tab}
+                    aria-label="Tabs where each tab needs to be selected manually"
+                >
+                    {
+                        navArr.map((ele, idx) => {
+                            return (
+                                <Tab key={ele} label={ele} value={ele} />
+                            )
+                        })
+                    }
+                </Tabs>
+
+                <IconButton
+                    className="moreIcon"
+                    aria-label="more"
+                    id="long-button"
+                    aria-controls="long-menu"
+                    aria-expanded={open ? 'true' : undefined}
+                    aria-haspopup="true"
+                    onClick={toggleDrawer(anchor, true)}
+                >
+                    <MenuIcon />
+                </IconButton>
+
+                <Drawer
+                    anchor={anchor}
+                    open={state[anchor]}
+                    onClose={toggleDrawer(anchor, false)}
+                >
+                    {list(anchor)}
+                </Drawer>
+            </Box>
+
+            <div className="mainContent">
+
+                <div className="titleContainer">
+                    <h1>台灣旅遊景點導覽</h1>
+                    <div className="searchItemWrap">
 
 
+                        <div className="searchItem">
+                            <FormControl fullWidth>
+                                {/* <InputLabel id="demo-simple-select-label">縣市</InputLabel> */}
+                                <Select
+                                    className="dropDownInput"
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={searchCity}
+                                    label="縣市"
+                                    onChange={handleCityChange}
+                                >
+                                    {CityData.data.map((cityObj) => {
+                                        return (
+                                            <MenuItem
+                                                key={cityObj.CityEngName}
+                                                value={cityObj.CityEngName}
+                                            // onClick={selectedCity => setSeachCity(selectedCity['key'])}
+                                            >
+                                                {cityObj.CityName}
+                                            </MenuItem>
+                                        )
+                                    })
+                                    }
+                                </Select>
+                            </FormControl>
+                        </div>
+                        <div className="searchItem">
+                            <TextField
+                                className="searchInput"
+                                id="outlined-basic" label="搜尋關鍵字" variant="outlined" onChange={(e: Object) => handleKeyword(e)} />
+                        </div>
+                        <div className="searchItem">
+                            <Button variant="outlined" onClick={() => searchTouristPlace(searchCity, keyWord)}>搜索</Button>
+                        </div>
+                    </div>
                 </div>
 
-                <FontAwesomeIcon icon={faLocationArrow} /> 景點
+                <EjectIcon className="triangleIcon" onClick={() => { () => slideUp() }} />
+            </div>
+
+            <Container>
+                {/* <SmallTitle /> */}
+                <section className="weatherSect">
+                    <Typography variant="h6">
+                        <FontAwesomeIcon icon={faThermometerQuarter} /> 目前天氣
+                    </Typography>
+                </section>
+
+
+                <section className="recommendPlace">
+                    <Typography variant="h6">
+                        <FontAwesomeIcon icon={faLocationArrow} /> 附近景點
+                    </Typography>
+                </section>
+
+
+                <Typography variant="h6" className="searchResult">
+                    <FontAwesomeIcon icon={faSearch} /> 搜尋結果
+                </Typography>
+
                 <section className="tourSectWrap">
                     {
                         tourData.map((ele, idx) => {
@@ -131,52 +265,29 @@ export default function Index() {
                                     <CardMedia
                                         component="img"
                                         height="140"
-                                        image={ele.Picture['PictureUrl1']}
+                                        image={ele.Picture['PictureUrl1'] || '/img/defaultPlace.png'}
                                         alt="green iguana"
                                     />
                                     <CardContent>
                                         <Typography gutterBottom variant="h5" component="div">
                                             {ele.Name}
                                         </Typography>
-                                        <Typography variant="body2" color="text.secondary">
+                                        <Typography className="siteDesp" variant="body2" color="text.secondary">
                                             {ele.DescriptionDetail}
                                         </Typography>
                                     </CardContent>
-                                    <CardActions>
-                                        <Button size="small" target="blank" href={ele.WebsiteUrl}>了解詳情</Button>
+                                    <CardActions className="knowMoreWrap">
+                                        <Button size="small" target="blank" href={ele.WebsiteUrl}>了解更多<ArrowRightIcon /></Button>
                                     </CardActions>
                                 </Card>
-                                // <Col span={6}>
-                                //     <Card
-                                //         key={idx}
-                                //         hoverable
-                                //         style={{ width: 240 }}
-                                //         cover={<img alt="example" src={ele.Picture['PictureUrl1']} />}
-                                //     >
-                                //         <Meta title={ele.Name} />
-
-                                //         {
-                                //             ele.Address &&
-                                //             <Card.Grid className="address" >
-                                //                 <FontAwesomeIcon icon={faMapMarkerAlt} />
-                                //                 {ele.Address}
-                                //             </Card.Grid>
-                                //         }                                    
-
-                                //         <div className="contactInfo">
-                                //             <FontAwesomeIcon icon={faPhoneVolume} />
-                                //             {ele.Phone}
-                                //         </div>
-                                //         <Meta description={ele.DescriptionDetail} />
-                                //     </Card>
-                                // </Col>
                             )
                         })
                     }
                 </section>
+            </Container>
 
-            </Content>
-            <Footer style={{ textAlign: 'center' }}>Designed by Violet Developed by Jinwei ©2021 </Footer>
-        </Layout>
+
+            {/* <Footer style={{ textAlign: 'center' }}>Designed by Violet Developed by Jinwei ©2021 </Footer> */}
+        </div>
     )
 }
