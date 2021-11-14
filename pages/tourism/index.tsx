@@ -22,7 +22,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 
 import GoogleMapReact from 'google-map-react';
-import { Key } from '../../key.js';
+// import { Key } from '../../key.js';
 
 export default function Index() {
 
@@ -305,7 +305,7 @@ export default function Index() {
                     </Typography>
                     <div style={{ height: '30vh', width: '100%' }}>
                         <GoogleMapReact
-                            bootstrapURLKeys={{ key: Key }}
+                            bootstrapURLKeys={{ key: process.env.MAP_KEY }}
                             defaultCenter={{
                                 lat: curPosition[0],
                                 lng: curPosition[1]
@@ -406,7 +406,7 @@ export default function Index() {
                                         </Typography>
                                         <div style={{ height: '30vh', width: '100%' }}>
                                             <GoogleMapReact
-                                                bootstrapURLKeys={{ key: Key }}
+                                                bootstrapURLKeys={{ key: process.env.MAP_KEY }}
                                                 defaultCenter={{
                                                     lat: popData.Position.PositionLat,
                                                     lng: popData.Position.PositionLon
