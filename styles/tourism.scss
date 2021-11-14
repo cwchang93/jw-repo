@@ -1,3 +1,5 @@
+$mapTag1:#EE675C;
+$mapTag2:#5491F5;
 @mixin shortInput {
     padding-top: 12px;
     padding-bottom: 12px;
@@ -23,6 +25,77 @@
     -webkit-animation-iteration-count: infinite;
     -webkit-animation-timing-function: ease-in-out;
     -webkit-animation-direction: alternate;
+}
+
+.mapTag {
+    color: $mapTag1;
+    font-size: 24px;
+}
+
+.popModal {
+    .MuiBox-root {
+        width: 90%;
+        padding: 18px;
+        border-radius: 10px;
+        border-color: #666;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        .MuiCardContent-root {
+            max-height: 300px;
+            overflow: scroll;
+        }
+        .closeIcon {
+            cursor: pointer;
+            position: absolute;
+            top: 3px;
+            right: 7px;
+            font-size: 14px;
+            color: #666;
+        }
+        .modalMapTag {
+            color: $mapTag2;
+            font-size: 18px;
+        }
+    }
+    .siteTitle {
+        position: relative;
+        >svg {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            cursor: pointer;
+        }
+    }
+    .siteDesp {
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .showDetail {
+        display: block;
+    }
+    .MuiTypography-body2 {
+        margin-bottom: 5px;
+        >span {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    }
+    .knowMoreWrap {
+        justify-content: flex-end;
+    }
+    @media (min-width: 768px) {
+        .MuiBox-root {
+            width: 60%;
+            max-height: 90vh;
+        }
+    }
 }
 
 .pg_tourism {
@@ -51,6 +124,7 @@
             }
         }
         .logoWrap {
+            cursor: pointer;
             font-size: 24px;
             display: flex;
             >img {

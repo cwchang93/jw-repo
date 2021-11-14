@@ -6,7 +6,7 @@ import CityData from '../../json/city.json';
 import { getAuthorizationHeader } from '../../utils/key'
 import cx from 'classnames';
 
-import { faLocationArrow, faThermometerQuarter, faSearch } from '@fortawesome/free-solid-svg-icons'
+import { faLocationArrow, faThermometerQuarter, faSearch, faChevronCircleUp, faChevronCircleDown, faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useScrollPosition } from 'react-use-scroll-position';
 
@@ -21,6 +21,9 @@ import EjectIcon from '@mui/icons-material/Eject';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 
+import GoogleMapReact from 'google-map-react';
+import { Key } from '../../key.js';
+
 export default function Index() {
 
     const { data } = CityData;
@@ -31,6 +34,8 @@ export default function Index() {
         '觀光'
     ];
 
+    const AnyReactComponent = ({ text }) => <div>{text}</div>;
+
     const [tourData, setTourData] = React.useState([]);
     const [searchCity, setSeachCity] = React.useState<string>('Taipei City');
     const [tab, setTab] = React.useState(navArr[0]);
@@ -38,6 +43,8 @@ export default function Index() {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [showNav, setShowNav] = React.useState<boolean>(false);
+
+    const [showDetail, setShowDetail] = React.useState<boolean>(false);
 
     const [state, setState] = React.useState({
         top: false,
@@ -48,12 +55,14 @@ export default function Index() {
 
     const [popData, setPopData] = React.useState(null);
 
+    const [curPosition, setCurPosition] = React.useState([25.0715015, 121.6628513])
+
     const style = {
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 400,
+        // width: 400,
         bgcolor: 'background.paper',
         border: '2px solid #000',
         boxShadow: 24,
@@ -73,6 +82,7 @@ export default function Index() {
     // first time
     React.useEffect(() => {
         searchTouristPlace('Taipei', '');
+        getCurPosition()
     }, [])
 
     React.useEffect(() => {
@@ -124,6 +134,27 @@ export default function Index() {
         console.log('clickedData', clickedData)
         setPopData(clickedData);
         setOpen(true);
+    }
+
+    const getCurPosition = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                console.log(position);
+                const {
+                    latitude
+                } = position.coords;
+                const {
+                    longitude
+                } = position.coords;
+
+                const coords = [latitude, longitude];
+                setCurPosition(coords);
+
+
+            }, () => {
+                alert('Could not get the position!')
+            });
+        }
     }
 
 
@@ -270,8 +301,23 @@ export default function Index() {
 
                 <section className="recommendPlace">
                     <Typography variant="h6">
-                        <FontAwesomeIcon icon={faLocationArrow} /> 附近景點
+                        <FontAwesomeIcon icon={faLocationArrow} /> 目前位置＆附近景點
                     </Typography>
+                    <div style={{ height: '30vh', width: '100%' }}>
+                        <GoogleMapReact
+                            bootstrapURLKeys={{ key: Key }}
+                            defaultCenter={{
+                                lat: curPosition[0],
+                                lng: curPosition[1]
+                            }}
+                            defaultZoom={14}
+                        >
+                            <FontAwesomeIcon
+                                className="mapTag"
+                                icon={faMapMarkerAlt}
+                            />
+                        </GoogleMapReact>
+                    </div>
                 </section>
 
 
@@ -282,7 +328,7 @@ export default function Index() {
                     {
                         tourData.map((ele, idx) => {
                             return (
-                                <Card key={ele.ID} sx={{ maxWidth: 345 }}>
+                                <Card key={ele.ID} >
                                     <CardMedia
                                         component="img"
                                         height="240"
@@ -308,6 +354,7 @@ export default function Index() {
                 {popData &&
 
                     <Modal
+                        className="popModal"
                         aria-labelledby="transition-modal-title"
                         aria-describedby="transition-modal-description"
                         open={open}
@@ -319,8 +366,9 @@ export default function Index() {
                         }}
                     >
                         <Fade in={open}>
-                            <Box sx={style}>
-                                <Card key={popData.ID} sx={{ maxWidth: 345 }}>
+                            {/* <Box sx={style}> */}
+                            <Box>
+                                <Card key={popData.ID} >
                                     <CardMedia
                                         component="img"
                                         height="240"
@@ -328,17 +376,65 @@ export default function Index() {
                                         alt="green iguana"
                                     />
                                     <CardContent>
-                                        <Typography gutterBottom variant="h5" component="div">
+                                        <Typography gutterBottom variant="h5" className="siteTitle" component="div" >
                                             {popData.Name}
+                                            {
+                                                <FontAwesomeIcon onClick={() => setShowDetail(!showDetail)} icon={showDetail ? faChevronCircleUp : faChevronCircleDown} />
+                                            }
                                         </Typography>
-                                        <Typography className="siteDesp" variant="body2" color="text.secondary">
+                                        <Typography gutterBottom variant="h6" component="div">
+                                            {popData.Address}
+                                        </Typography>
+                                        <Typography className={cx({ showDetail: showDetail }, 'siteDesp')} variant="body2" color="text.secondary">
                                             {popData.DescriptionDetail}
                                         </Typography>
+                                        {/* <Typography className="entryFee" variant="body2" color="text.secondary">
+                                            <span className="subTitle">
+                                                入場費用:
+                                            </span>
+                                        </Typography> */}
+                                        <Typography className="contactNum" variant="body2" color="text.secondary">
+                                            <span className="subTitle">
+                                                聯絡電話:
+                                            </span>{popData.Phone}
+                                        </Typography>
+                                        <Typography className="openTime" variant="body2" color="text.secondary">
+                                            <span className="subTitle">
+                                                開放時間:
+                                            </span>
+                                            {popData.OpenTime}
+                                        </Typography>
+                                        <div style={{ height: '30vh', width: '100%' }}>
+                                            <GoogleMapReact
+                                                bootstrapURLKeys={{ key: Key }}
+                                                defaultCenter={{
+                                                    lat: popData.Position.PositionLat,
+                                                    lng: popData.Position.PositionLon
+                                                }}
+                                                defaultZoom={14}
+                                            >
+                                                <FontAwesomeIcon
+                                                    className="modalMapTag"
+                                                    icon={faMapMarkerAlt}
+                                                />
+                                            </GoogleMapReact>
+                                        </div>
                                     </CardContent>
                                     <CardActions className="knowMoreWrap">
                                         <Button size="small" href={popData.WebsiteUrl} target="blank">官方連結<ArrowRightIcon /></Button>
                                     </CardActions>
+                                    {/* <CardActions className="knowMoreWrap">
+                                     
+                                    </CardActions> */}
+
+
+
                                 </Card>
+                                <FontAwesomeIcon
+                                    className="closeIcon"
+                                    icon={faTimes}
+                                    onClick={handleClose}
+                                />
                             </Box>
                         </Fade>
                     </Modal>
