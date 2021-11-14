@@ -306,7 +306,7 @@ export default function Index() {
                     </Typography>
                     <div style={{ height: '30vh', width: '100%' }}>
                         <GoogleMapReact
-                            bootstrapURLKeys={{ key: process.env.MAP_KEY }}
+                            bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPKEY }}
                             defaultCenter={{
                                 lat: curPosition[0],
                                 lng: curPosition[1]
@@ -407,7 +407,7 @@ export default function Index() {
                                         </Typography>
                                         <div style={{ height: '30vh', width: '100%' }}>
                                             <GoogleMapReact
-                                                bootstrapURLKeys={{ key: process.env.MAP_KEY }}
+                                                bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPKEY }}
                                                 defaultCenter={{
                                                     lat: popData.Position.PositionLat,
                                                     lng: popData.Position.PositionLon
