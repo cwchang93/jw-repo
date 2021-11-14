@@ -83,6 +83,7 @@ export default function Index() {
     React.useEffect(() => {
         searchTouristPlace('Taipei', '');
         getCurPosition()
+        console.log('env', process.env);
     }, [])
 
     React.useEffect(() => {
