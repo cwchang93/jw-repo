@@ -6,7 +6,7 @@ import CityData from '../../json/city.json';
 import { getAuthorizationHeader } from '../../utils/key'
 import cx from 'classnames';
 
-import { faLocationArrow, faThermometerQuarter, faSearch, faChevronCircleUp, faChevronCircleDown, faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faLocationArrow, faThermometerQuarter, faSearch, faChevronCircleUp, faChevronCircleDown, faMapMarkerAlt, faTimes, faStreetView } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useScrollPosition } from 'react-use-scroll-position';
 
@@ -34,7 +34,9 @@ export default function Index() {
         '觀光'
     ];
 
-    const AnyReactComponent = ({ text }) => <div>{text}</div>;
+    const AnyReactComponent = ({ text }) => <div><FontAwesomeIcon className="mapTag" icon={faStreetView} /> {text} </div>;
+
+    const CurPositionComponent = ({ text }) => <div><FontAwesomeIcon className="mapTag" icon={faMapMarkerAlt} /> {text} </div>;
 
     const [tourData, setTourData] = React.useState([]);
     const [searchCity, setSeachCity] = React.useState<string>('Taipei City');
@@ -57,20 +59,6 @@ export default function Index() {
 
     const [curPosition, setCurPosition] = React.useState([25.0715015, 121.6628513])
 
-    const style = {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        // width: 400,
-        bgcolor: 'background.paper',
-        border: '2px solid #000',
-        boxShadow: 24,
-        p: 4,
-    };
-
-    // const open = Boolean(anchorEl);
-
     const anchor = 'right';
 
     const { y: yPosition } = useScrollPosition();
@@ -83,15 +71,17 @@ export default function Index() {
     React.useEffect(() => {
         searchTouristPlace('Taipei', '');
         getCurPosition()
-        console.log('env', process.env);
     }, [])
 
     React.useEffect(() => {
         searchTouristPlace(searchCity, keyWord);
-    }, [searchCity])
+        setCurPosition(curPosition);
+    }, [searchCity, curPosition])
 
     React.useEffect(() => {
         yPosition !== 0 ? setShowNav(true) : setShowNav(false);
+        // setCurPosition(curPosition);
+        // if (JSON.stringify(curPosition) !== )
     }, [yPosition])
 
 
@@ -153,7 +143,7 @@ export default function Index() {
 
 
             }, () => {
-                alert('Could not get the position!')
+                alert('無法找到你現在位置，請刷先頁面，再試一次')
             });
         }
     }
@@ -194,12 +184,22 @@ export default function Index() {
         })
     }
 
+    const positionObj = {
+        lat: curPosition[0],
+        lng: curPosition[1],
+    }
+
+    const curPositionObj = {
+        lat: popData?.Position?.PositionLat,
+        lng: popData?.Position?.PositionLon
+    }
 
 
     return (
         <div className='pg_tourism'>
             <Box className={cx({ showNav: showNav })}>
                 <div className="logoWrap">
+
                     <img src="/svg/taiwan-icon-white.svg" alt="taiwan-icon" />
                     <div className="travelTxt">
                         <div>
@@ -292,12 +292,11 @@ export default function Index() {
             </div>
 
             <Container>
-                {/* <SmallTitle /> */}
-                <section className="weatherSect">
+                {/* <section className="weatherSect">
                     <Typography variant="h6">
                         <FontAwesomeIcon icon={faThermometerQuarter} /> 目前天氣
                     </Typography>
-                </section>
+                </section> */}
 
 
                 <section className="recommendPlace">
@@ -307,15 +306,15 @@ export default function Index() {
                     <div style={{ height: '30vh', width: '100%' }}>
                         <GoogleMapReact
                             bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPKEY }}
-                            defaultCenter={{
+                            center={{
                                 lat: curPosition[0],
                                 lng: curPosition[1]
                             }}
-                            defaultZoom={14}
+                            zoom={14}
                         >
-                            <FontAwesomeIcon
-                                className="mapTag"
-                                icon={faMapMarkerAlt}
+                            <AnyReactComponent
+                                {...positionObj}
+                                text=""
                             />
                         </GoogleMapReact>
                     </div>
@@ -408,17 +407,18 @@ export default function Index() {
                                         <div style={{ height: '30vh', width: '100%' }}>
                                             <GoogleMapReact
                                                 bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPKEY }}
-                                                defaultCenter={{
+                                                center={{
                                                     lat: popData.Position.PositionLat,
                                                     lng: popData.Position.PositionLon
                                                 }}
-                                                defaultZoom={14}
+                                                zoom={14}
                                             >
-                                                <FontAwesomeIcon
-                                                    className="modalMapTag"
-                                                    icon={faMapMarkerAlt}
+                                                <CurPositionComponent
+                                                    {...curPositionObj}
+                                                    text="這裡"
                                                 />
                                             </GoogleMapReact>
+
                                         </div>
                                     </CardContent>
                                     <CardActions className="knowMoreWrap">
