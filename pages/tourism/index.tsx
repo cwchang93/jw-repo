@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import axios from 'axios';
 import * as React from 'react';
 
@@ -6,7 +5,7 @@ import CityData from '../../json/city.json';
 import { getAuthorizationHeader } from '../../utils/key'
 import cx from 'classnames';
 
-import { faLocationArrow, faThermometerQuarter, faSearch, faChevronCircleUp, faChevronCircleDown, faMapMarkerAlt, faTimes, faStreetView } from '@fortawesome/free-solid-svg-icons'
+import { faLocationArrow, faSearch, faChevronCircleUp, faChevronCircleDown, faMapMarkerAlt, faTimes, faStreetView } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useScrollPosition } from 'react-use-scroll-position';
 
@@ -26,7 +25,14 @@ import GoogleMapReact from 'google-map-react';
 
 export default function Index() {
 
+    // KEYS
+    const MAP_KEY = process.env.NEXT_PUBLIC_MAPKEY;
+    const PTX_ID = process.env.NEXT_PUBLIC_PTXID;
+    const PTX_KEY = process.env.NEXT_PUBLIC_PTXKEY;
+
+    // Data
     const { data } = CityData;
+
     const navArr = [
         '主頁',
         '餐飲',
@@ -42,7 +48,6 @@ export default function Index() {
     const [searchCity, setSeachCity] = React.useState<string>('Taipei City');
     const [tab, setTab] = React.useState(navArr[0]);
     const [keyWord, setKeyword] = React.useState<string>('');
-    const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [showNav, setShowNav] = React.useState<boolean>(false);
 
@@ -177,7 +182,7 @@ export default function Index() {
         const fectchedApi = keywordTxt ? `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$filter=contains(Name,'${keywordTxt}')&$top=${dataNums}&$format=JSON` : `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(city)}?$top=${dataNums}&$format=JSON`
 
         axios.get(fectchedApi, {
-            headers: getAuthorizationHeader()
+            headers: getAuthorizationHeader(PTX_ID, PTX_KEY)
         }).then((res) => {
             console.log(res.data);
             setTourData(res.data);
@@ -305,7 +310,7 @@ export default function Index() {
                     </Typography>
                     <div style={{ height: '30vh', width: '100%' }}>
                         <GoogleMapReact
-                            bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPKEY }}
+                            bootstrapURLKeys={{ key: MAP_KEY }}
                             center={{
                                 lat: curPosition[0],
                                 lng: curPosition[1]
@@ -406,7 +411,7 @@ export default function Index() {
                                         </Typography>
                                         <div style={{ height: '30vh', width: '100%' }}>
                                             <GoogleMapReact
-                                                bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPKEY }}
+                                                bootstrapURLKeys={{ key: MAP_KEY }}
                                                 center={{
                                                     lat: popData.Position.PositionLat,
                                                     lng: popData.Position.PositionLon
@@ -424,11 +429,6 @@ export default function Index() {
                                     <CardActions className="knowMoreWrap">
                                         <Button size="small" href={popData.WebsiteUrl} target="blank">官方連結<ArrowRightIcon /></Button>
                                     </CardActions>
-                                    {/* <CardActions className="knowMoreWrap">
-                                     
-                                    </CardActions> */}
-
-
 
                                 </Card>
                                 <FontAwesomeIcon
