@@ -44,6 +44,8 @@ import {
   Fade,
   Modal,
   Backdrop,
+  ClickAwayListener,
+  Popper,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -65,18 +67,20 @@ export default function Index() {
   const navArr = ["主頁", "餐飲", "旅宿", "觀光"];
 
   const AnyReactComponent = ({ text }) => (
-    <div>
+    <div className="curPositionWrap">
       <FontAwesomeIcon className="mapTag" icon={faStreetView} /> {text}{" "}
     </div>
   );
 
-  const CurPositionComponent = ({ text }) => (
-    <div>
-      <FontAwesomeIcon className="mapTag" icon={faMapMarkerAlt} /> {text}{" "}
-    </div>
-  );
+  const BikeComponent = (dataObj) => {
+    return (
+      <div className="bikeWrap">
+        <FontAwesomeIcon className="bikeTag" icon={faMapMarkerAlt} />
+      </div>
+    );
+  };
 
-  const [tourData, setTourData] = React.useState([]);
+  const [bikeData, setBikeData] = React.useState([]);
   const [searchCity, setSeachCity] = React.useState<string>("Taipei City");
   const [tab, setTab] = React.useState(navArr[0]);
   const [keyWord, setKeyword] = React.useState<string>("");
@@ -120,8 +124,6 @@ export default function Index() {
 
   React.useEffect(() => {
     yPosition !== 0 ? setShowNav(true) : setShowNav(false);
-    // setCurPosition(curPosition);
-    // if (JSON.stringify(curPosition) !== )
   }, [yPosition]);
 
   const toggleDrawer = (anchor, open) => (event) => {
@@ -177,7 +179,7 @@ export default function Index() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log(position);
+          //   console.log(position);
           const { latitude } = position.coords;
           const { longitude } = position.coords;
 
@@ -220,21 +222,15 @@ export default function Index() {
     keywordTxt: string,
     dataNums: number = 40
   ) => {
-    const fectchedApi = keywordTxt
-      ? `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(
-          city
-        )}?$filter=contains(Name,'${keywordTxt}')&$top=${dataNums}&$format=JSON`
-      : `https://ptx.transportdata.tw/MOTC/v2/Tourism/ScenicSpot/${filterApiKey(
-          city
-        )}?$top=${dataNums}&$format=JSON`;
+    const fectchedApi = `https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NearBy?$top=30&$spatialFilter=nearby(${positionObj["lat"]}, ${positionObj["lng"]}, 1000)&$format=JSON`;
 
-    axios
+    https: axios
       .get(fectchedApi, {
         headers: getAuthorizationHeader(PTX_ID, PTX_KEY),
       })
       .then((res) => {
-        console.log(res.data);
-        setTourData(res.data);
+        console.log("res", res);
+        setBikeData(res.data);
       });
   };
 
@@ -249,7 +245,7 @@ export default function Index() {
   };
 
   return (
-    <div className="pg_tourism">
+    <div className="pg_bike">
       <Box className={cx({ showNav: showNav })}>
         <div className="logoWrap">
           <img src="/svg/taiwan-icon-white.svg" alt="taiwan-icon" />
@@ -346,171 +342,38 @@ export default function Index() {
       </div>
 
       <Container>
-        {/* <section className="weatherSect">
-                    <Typography variant="h6">
-                        <FontAwesomeIcon icon={faThermometerQuarter} /> 目前天氣
-                    </Typography>
-                </section> */}
-
         <section className="recommendPlace">
           <Typography variant="h6">
-            <FontAwesomeIcon icon={faLocationArrow} /> 目前位置＆附近景點
+            <FontAwesomeIcon icon={faLocationArrow} /> 目前位置＆附近單車
           </Typography>
-          <div style={{ height: "30vh", width: "100%" }}>
+          <div style={{ height: "80vh", width: "100%" }}>
             <GoogleMapReact
               bootstrapURLKeys={{ key: MAP_KEY }}
               center={{
                 lat: curPosition[0],
                 lng: curPosition[1],
               }}
-              zoom={14}
+              zoom={16}
             >
               <AnyReactComponent {...positionObj} text="" />
+
+              {bikeData.map((eachStation, idx) => {
+                const positionObj = {
+                  lat: eachStation["StationPosition"]["PositionLat"],
+                  lng: eachStation["StationPosition"]["PositionLon"],
+                };
+                return (
+                  <BikeComponent
+                    key={eachStation["StationID"]}
+                    dataObj={eachStation}
+                    // text={eachStation["StationName"]["Zh_tw"].split("_")[1]}
+                    {...positionObj}
+                  />
+                );
+              })}
             </GoogleMapReact>
           </div>
         </section>
-
-        <Typography variant="h6" className="searchResult">
-          <FontAwesomeIcon icon={faSearch} /> 搜尋結果
-        </Typography>
-        <section className="tourSectWrap">
-          {tourData.map((ele, idx) => {
-            return (
-              <Card key={ele.ID}>
-                <CardMedia
-                  component="img"
-                  height="240"
-                  image={ele.Picture["PictureUrl1"] || "/img/defaultPlace.png"}
-                  alt="green iguana"
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {ele.Name}
-                  </Typography>
-                  <Typography
-                    className="siteDesp"
-                    variant="body2"
-                    color="text.secondary"
-                  >
-                    {ele.DescriptionDetail}
-                  </Typography>
-                </CardContent>
-                <CardActions className="knowMoreWrap">
-                  <Button size="small" onClick={() => openLightBox(ele)}>
-                    了解更多
-                    <ArrowRightIcon />
-                  </Button>
-                </CardActions>
-              </Card>
-            );
-          })}
-        </section>
-        {popData && (
-          <Modal
-            className="popModal"
-            aria-labelledby="transition-modal-title"
-            aria-describedby="transition-modal-description"
-            open={open}
-            onClose={handleClose}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{
-              timeout: 500,
-            }}
-          >
-            <Fade in={open}>
-              {/* <Box sx={style}> */}
-              <Box>
-                <Card key={popData.ID}>
-                  <CardMedia
-                    component="img"
-                    height="240"
-                    image={
-                      popData.Picture["PictureUrl1"] || "/img/defaultPlace.png"
-                    }
-                    alt="green iguana"
-                  />
-                  <CardContent>
-                    <Typography
-                      gutterBottom
-                      variant="h5"
-                      className="siteTitle"
-                      component="div"
-                    >
-                      {popData.Name}
-                      {
-                        <FontAwesomeIcon
-                          onClick={() => setShowDetail(!showDetail)}
-                          icon={
-                            showDetail ? faChevronCircleUp : faChevronCircleDown
-                          }
-                        />
-                      }
-                    </Typography>
-                    <Typography gutterBottom variant="h6" component="div">
-                      {popData.Address}
-                    </Typography>
-                    <Typography
-                      className={cx({ showDetail: showDetail }, "siteDesp")}
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      {popData.DescriptionDetail}
-                    </Typography>
-                    {/* <Typography className="entryFee" variant="body2" color="text.secondary">
-                                            <span className="subTitle">
-                                                入場費用:
-                                            </span>
-                                        </Typography> */}
-                    <Typography
-                      className="contactNum"
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      <span className="subTitle">聯絡電話:</span>
-                      {popData.Phone}
-                    </Typography>
-                    <Typography
-                      className="openTime"
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      <span className="subTitle">開放時間:</span>
-                      {popData.OpenTime}
-                    </Typography>
-                    <div style={{ height: "30vh", width: "100%" }}>
-                      <GoogleMapReact
-                        bootstrapURLKeys={{ key: MAP_KEY }}
-                        center={{
-                          lat: popData.Position.PositionLat,
-                          lng: popData.Position.PositionLon,
-                        }}
-                        zoom={14}
-                      >
-                        <CurPositionComponent {...curPositionObj} text="這裡" />
-                      </GoogleMapReact>
-                    </div>
-                  </CardContent>
-                  <CardActions className="knowMoreWrap">
-                    <Button
-                      size="small"
-                      href={popData.WebsiteUrl}
-                      target="blank"
-                    >
-                      官方連結
-                      <ArrowRightIcon />
-                    </Button>
-                  </CardActions>
-                </Card>
-                <FontAwesomeIcon
-                  className="closeIcon"
-                  icon={faTimes}
-                  onClick={handleClose}
-                />
-              </Box>
-            </Fade>
-          </Modal>
-        )}
       </Container>
 
       {/* <Footer style={{ textAlign: 'center' }}>Designed by Violet Developed by Jinwei ©2021 </Footer> */}
